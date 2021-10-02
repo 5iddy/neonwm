@@ -34,6 +34,20 @@ static const unsigned int alphas[][3]      = {
 /* tagging */
 static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
 
+static const char *tagsel[][2] = {
+	{ "#ff4892", "#24222F"  },
+	{ "#ffbe20", "#24222F"  },
+	{ "#35DD9D", "#24222F"  },
+	{ "#63BCFF", "#24222F"  },
+	{ "#fb49c6", "#24222F"  },
+	{ "#EAEAEA", "#24222F"  },
+	{ "#2bfbfb", "#24222F"  },
+	{ "#EBEC5E", "#24222F"  },
+	{ "#89EC4B", "#24222F"  },
+};
+
+static const unsigned int tagalpha[] = { OPAQUE, baralpha };
+
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
