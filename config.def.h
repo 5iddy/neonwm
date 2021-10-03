@@ -18,7 +18,7 @@ static const char col_green[]       = "#35DD9D";
 static const char col_red[]         = "#ff4892";
 static const char col_yellow[]      = "#FFBE20";
 static const char col_blue[]        = "#63BCFF";
-static const char col_pink[]        = "#FB49C6";
+static const char col_magenta[]     = "#FB49C6";
 static const char col_white[]       = "#EAEAEA";
 static const char col_cyan2[]       = "#2bfbfb";
 static const char col_yellow2[]     = "#EBEC5E";
@@ -29,14 +29,14 @@ static const unsigned int borderalpha = OPAQUE;
 
 static const char *colors[][3]      = {
 	//               fg         bg         border   
-	[SchemeNorm] = { col_gray3, col_gray2, col_gray3 },
-	[SchemeSel]  = { col_green, col_gray1, col_gray4 },
+	[SchemeNorm] = { col_gray4, col_gray2, col_gray3 },
+	[SchemeSel]  = { col_green, col_gray1, col_cyan },
 };
 
 static const unsigned int alphas[][3]      = {
 	//               fg      bg        border     
 	[SchemeNorm] = { OPAQUE, baralpha, borderalpha },
-	[SchemeSel]  = { OPAQUE, OPAQUE, borderalpha },
+	[SchemeSel]  = { OPAQUE, baralpha, borderalpha },
 };
 
 /* tagging */
@@ -47,7 +47,7 @@ static const char *tagsel[][2] = {
 	{ col_yellow,   col_gray1 },
 	{ col_green,    col_gray1 },
 	{ col_blue,     col_gray1 },
-	{ col_pink,     col_gray1 },
+	{ col_magenta,  col_gray1 },
 	{ col_white,    col_gray1 },
 	{ col_cyan2,    col_gray1 },
 	{ col_yellow2,  col_gray1 },
@@ -68,9 +68,9 @@ static const Rule rules[] = {
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static const int nmaster     = 1;    /* number of clients in master area */
-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
+static const int   nmaster     = 1;    /* number of clients in master area */
+static const int   resizehints = 1;    /* 1 means respect size hints in tiled resizals */
+static const int   lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
@@ -118,9 +118,14 @@ static const Launcher launchers[] = {
   { ranger,       "" },
   { thunar,       "" },
   { shutdown,     "" },
-
 };
 
+static const char *const autostart[] = {
+	"feh", "--bg-fill", "/home/noodles/Pictures/wallpapers/michal-kvac-early-evening-small.jpg", NULL, 
+  "conky", "-c", "~/.config/conky/dwm.conf", "|", "dwm-status" ,NULL,
+  // "picom", "--config", "/home/noodles/.config/picom/dwm.conf", NULL,
+  NULL /* terminate */
+};
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
