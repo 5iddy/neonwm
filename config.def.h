@@ -9,6 +9,7 @@ static const double defaultopacity  = 0.8;
 static const double noopacity       = 1;
 static const char *fonts[]          = { "Input Mono Condensed:pixelsize=16:style=regular:antialias=true:autohint=true",
     "FontAwesome:pixelsize=16:antialias=true:autohint=true", 
+    "Noto Sans Telugu UI:pixelsize=16:antialias=true:autohint=true",
                                       };
 static const char dmenufont[]       = "Input Mono Condensed:pixelsize=16:antialias=true:autohint=true";
 static const char col_gray1[]       = "#24222F";
@@ -42,7 +43,12 @@ static const unsigned int alphas[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
+static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
+// uncomment the below line for english tags 
+// static const char *tagsalt[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" }; 
+// uncomment the line below for telugu tags
+static const char *tagsalt[] = { "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯" }; // for telugu numbers, requires noto-fonts to work
+static const int momentaryalttags = 0; /* 1 means alttags will show only when key is held down*/
 
 static const char *tagsel[][2] = {
 	{ col_red,      col_gray1 },
@@ -66,7 +72,7 @@ static const Rule rules[] = {
   /* class      instance    title       tags mask     isfloating	 opacity   	monitor */
 	{ "Gimp",     NULL,       NULL,       0,            1,           noopacity,		   -1  },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           noopacity,		   -1  },
-	{ "St",	      NULL,       NULL,       0,            0,           noopacity, -1  },
+	{ "St",	      NULL,       NULL,       0,            0,           noopacity,      -1  },
 };
 
 /* layout(s) */
@@ -79,12 +85,13 @@ static const int   lockfullscreen = 0; /* 1 will force focus on the fullscreen w
 #include "grid.c"
 #include "horizgrid.c"
 static const Layout layouts[] = {
-	/* symbol     arrange function */
+	// symbol     arrange function
 	{ "",      tile }, // [0] tile isdefault
-	{ "",      NULL },    /* no layout function means floating behavior */
 	{ "",      monocle },
-  { "",      grid},
-  { "",      horizgrid},
+  { "",      grid},
+  { "",      horizgrid},
+	{ "",      NULL },    // no layout function means floating behavior
+  { NULL,     NULL }
 };
 
 /* key definitions */
@@ -113,8 +120,8 @@ static const char *yt[]           = {"surf", "https://youtube.com", NULL};
 static const char *firefox[]      = {"firefox", NULL};
 static const char *nvim[]         = SPAWN("nvim", "nvim");
 static const char *ranger[]       = SPAWN("Ranger", "ranger");
-static const char *shutdown[]     = SPAWNSH("shutdown now");
 static const char *thunar[]       = SPAWNSH("thunar");
+static const char *pavucontrol[]  = SPAWNSH("pavucontrol");
 
 static const Launcher launchers[] = {
        /* command       name to display */
@@ -124,16 +131,12 @@ static const Launcher launchers[] = {
   { nvim,         "" },
   { chromium,     "" },
   { ranger,       "" },
-  { thunar,       "" },
-  { shutdown,     "" },
+  { thunar,       "" },
+  { pavucontrol,  "" },
 };
 
-static const char autostartblocksh[] = "autostart_blocking.sh";
-static const char autostartsh[]      = "autostart.sh";
-
 static const char *const autostart[] = {
-	"source", "~/.xinitrc", NULL, 
-  "picom", "--config", "~/.config/picom/dwm.conf", NULL,
+  "picom", "--config", "/home/noodles/.config/picom/dwm.conf", NULL,
   NULL /* terminate */
 };
 
@@ -156,8 +159,9 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Tab,         view,           {0}                  },
 	{ MODKEY|ShiftMask,             XK_c,           killclient,     {0}                  },
 	{ MODKEY,                       XK_t,           setlayout,      {.v = &layouts[0]}   },
-	{ MODKEY,                       XK_f,           setlayout,      {.v = &layouts[1]}   },
-	{ MODKEY,                       XK_m,           setlayout,      {.v = &layouts[2]}   },
+	{ MODKEY,                       XK_m,           setlayout,      {.v = &layouts[1]}   },
+  { MODKEY|ControlMask,		        XK_comma,       cyclelayout,    {.i = -1 }           },
+	{ MODKEY|ControlMask,           XK_period,      cyclelayout,    {.i = +1 }           },
 	{ MODKEY,                       XK_space,       setlayout,      {0}                  },
 	{ MODKEY|ShiftMask,             XK_space,       togglefloating, {0}                  },
 	{ MODKEY,                       XK_0,           view,           {.ui = ~0 }          },
@@ -178,15 +182,17 @@ static Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,           quit,      {0}                       },
-  { SUPERKEY,                     XK_v,           spawn,     TERM("neovim", "nvim")    },
   { SUPERKEY,                     XK_space,       spawn,     ROFI("launcher_misc")     },
   { SUPERKEY,                     XK_r,           spawn,     ROFI("launcher_colorful") },
   { SUPERKEY,                     XK_q,           spawn,     ROFI("menu_powermenu")    },
   { SUPERKEY,                     XK_a,           spawn,     {.v = alacrittycmd}       },
   { SUPERKEY,                     XK_c,           spawn,     {.v = chromium }          },
   { SUPERKEY,                     XK_v,           spawn,     TERM("neovim", "nvim")    },
-  { ALTKEY,                       XK_g,      setlayout,      {.v = &layouts[3]} },
-  { ALTKEY|ShiftMask,             XK_g,      setlayout,      {.v = &layouts[4]} },
+  { ALTKEY,                       XK_g,      setlayout,      {.v = &layouts[2]} },
+  { ALTKEY|ShiftMask,             XK_g,      setlayout,      {.v = &layouts[3]} },
+	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[4]} },
+  { MODKEY,                       XK_n,      togglealttag,   {0} },
+  { MODKEY,                       XK_c,      setlayout,      {.v = &layouts[5]} },
 };
 
 /* button definitions */
