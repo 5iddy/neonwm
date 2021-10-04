@@ -1,5 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
+#ifndef __DWM_CONFIG_H__
+#define __DWM_CONFIG_H__
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
@@ -85,13 +87,14 @@ static const int   lockfullscreen = 0; /* 1 will force focus on the fullscreen w
 #include "grid.c"
 #include "horizgrid.c"
 static const Layout layouts[] = {
-	// symbol     arrange function
-	{ "",      tile }, // [0] tile isdefault
-	{ "",      monocle },
-  { "",      grid},
-  { "",      horizgrid},
-	{ "",      NULL },    // no layout function means floating behavior
-  { NULL,     NULL }
+	// symbol   arrange function
+	{ "",      tile      }, // [0] tile isdefault
+	{ "",      monocle   },
+  { "",      grid      },
+  { "",      horizgrid },
+	{ "",      NULL      }, // no layout function means floating behavior
+  { "TTT",    bstack    },
+  { NULL,     NULL      }
 };
 
 /* key definitions */
@@ -158,8 +161,13 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Return,      zoom,           {0}                  },
 	{ MODKEY,                       XK_Tab,         view,           {0}                  },
 	{ MODKEY|ShiftMask,             XK_c,           killclient,     {0}                  },
-	{ MODKEY,                       XK_t,           setlayout,      {.v = &layouts[0]}   },
-	{ MODKEY,                       XK_m,           setlayout,      {.v = &layouts[1]}   },
+  // Setting layout shortcuts
+	{ MODKEY,                       XK_t,           setlayout,      {.v = &layouts[0]}   }, // tile
+	{ MODKEY,                       XK_m,           setlayout,      {.v = &layouts[1]}   }, // monocle
+  { ALTKEY,                       XK_g,           setlayout,      {.v = &layouts[2]}   }, // grid
+  { ALTKEY|ShiftMask,             XK_g,           setlayout,      {.v = &layouts[3]}   }, // horizgrid
+	{ MODKEY,                       XK_f,           setlayout,      {.v = &layouts[4]}   }, // floats
+  { MODKEY,                       XK_u,           setlayout,      {.v = &layouts[5]}   }, // bstack
   { MODKEY|ControlMask,		        XK_comma,       cyclelayout,    {.i = -1 }           },
 	{ MODKEY|ControlMask,           XK_period,      cyclelayout,    {.i = +1 }           },
 	{ MODKEY,                       XK_space,       setlayout,      {0}                  },
@@ -188,11 +196,27 @@ static Key keys[] = {
   { SUPERKEY,                     XK_a,           spawn,     {.v = alacrittycmd}       },
   { SUPERKEY,                     XK_c,           spawn,     {.v = chromium }          },
   { SUPERKEY,                     XK_v,           spawn,     TERM("neovim", "nvim")    },
-  { ALTKEY,                       XK_g,      setlayout,      {.v = &layouts[2]} },
-  { ALTKEY|ShiftMask,             XK_g,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[4]} },
-  { MODKEY,                       XK_n,      togglealttag,   {0} },
-  { MODKEY,                       XK_c,      setlayout,      {.v = &layouts[5]} },
+  { MODKEY,                       XK_n,      togglealttag,   {0}                       },
+  { MODKEY,                       XK_Down,   moveresize,     {.v = "0x 25y 0w 0h" }    },
+	{ MODKEY,                       XK_Up,     moveresize,     {.v = "0x -25y 0w 0h" }   },
+	{ MODKEY,                       XK_Right,  moveresize,     {.v = "25x 0y 0w 0h" }    },
+	{ MODKEY,                       XK_Left,   moveresize,     {.v = "-25x 0y 0w 0h" }   },
+	{ MODKEY|ShiftMask,             XK_Down,   moveresize,     {.v = "0x 0y 0w 25h" }    },
+	{ MODKEY|ShiftMask,             XK_Up,     moveresize,     {.v = "0x 0y 0w -25h" }   },
+	{ MODKEY|ShiftMask,             XK_Right,  moveresize,     {.v = "0x 0y 25w 0h" }    },
+	{ MODKEY|ShiftMask,             XK_Left,   moveresize,     {.v = "0x 0y -25w 0h" }   },
+	{ MODKEY|ControlMask,           XK_Up,     moveresizeedge, {.v = "t"}                },
+	{ MODKEY|ControlMask,           XK_Down,   moveresizeedge, {.v = "b"}                },
+	{ MODKEY|ControlMask,           XK_Left,   moveresizeedge, {.v = "l"}                },
+	{ MODKEY|ControlMask,           XK_Right,  moveresizeedge, {.v = "r"}                },
+	{ MODKEY|ControlMask|ShiftMask, XK_Up,     moveresizeedge, {.v = "T"}                },
+	{ MODKEY|ControlMask|ShiftMask, XK_Down,   moveresizeedge, {.v = "B"}                },
+	{ MODKEY|ControlMask|ShiftMask, XK_Left,   moveresizeedge, {.v = "L"}                },
+	{ MODKEY|ControlMask|ShiftMask, XK_Right,  moveresizeedge, {.v = "R"}                },
+  { SUPERKEY,                     XK_Left,   viewtoleft,     {0}                       },
+	{ SUPERKEY,                     XK_Right,  viewtoright,    {0}                       },
+	{ SUPERKEY|ShiftMask,           XK_Left,   tagtoleft,      {0}                       },
+	{ SUPERKEY|ShiftMask,           XK_Right,  tagtoright,     {0}                       },
 };
 
 /* button definitions */
@@ -212,3 +236,4 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
 
+#endif // __DWM_CONFIG_H__
