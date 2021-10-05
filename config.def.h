@@ -8,7 +8,7 @@ static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const double defaultopacity  = 0.8;
-static const double noopacity       = 1;
+static const double fullopacity     = 1.0;
 static const char *fonts[]          = { "Input Mono Condensed:pixelsize=16:style=regular:antialias=true:autohint=true",
     "FontAwesome:pixelsize=16:antialias=true:autohint=true", 
     "Noto Sans Telugu UI:pixelsize=16:antialias=true:autohint=true",
@@ -35,7 +35,7 @@ static const unsigned int borderalpha = OPAQUE;
 static const char *colors[][3]      = {
 	//               fg         bg         border   
 	[SchemeNorm] = { col_gray4, col_gray2, col_gray3 },
-	[SchemeSel]  = { col_green, col_gray1, col_cyan },
+	[SchemeSel]  = { col_magenta, col_gray1, col_cyan },
 };
 
 static const unsigned int alphas[][3]      = {
@@ -71,10 +71,11 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-  /* class      instance    title       tags mask     isfloating	 opacity   	monitor */
-	{ "Gimp",     NULL,       NULL,       0,            1,           noopacity,		   -1  },
-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           noopacity,		   -1  },
-	{ "St",	      NULL,       NULL,       0,            0,           noopacity,      -1  },
+  /* class      instance    title       tags mask     isfloating	 opacity   	   monitor */
+	{ "Gimp",     NULL,       NULL,         0,          1,         fullopacity,		   -1  },
+	{ "Firefox",  NULL,       NULL,       1 << 8,       0,         fullopacity,		   -1  },
+	{ "St",	      NULL,       NULL,         0,          0,         fullopacity,      -1  },
+	{ "Chromium", "chromium", "Open Files", 0,          1,         fullopacity,      -1  },
 };
 
 /* layout(s) */
@@ -159,7 +160,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_h,           setmfact,       {.f = -0.05}         },
 	{ MODKEY,                       XK_l,           setmfact,       {.f = +0.05}         },
 	{ MODKEY,                       XK_Return,      zoom,           {0}                  },
-	{ MODKEY,                       XK_Tab,         view,           {0}                  },
+	{ MODKEY,                       XK_Tab,         focusstack,     {.i = +1}            },
+	{ MODKEY|ShiftMask,             XK_Tab,         focusstack,     {.i = -1}            },
 	{ MODKEY|ShiftMask,             XK_c,           killclient,     {0}                  },
   // Setting layout shortcuts
 	{ MODKEY,                       XK_t,           setlayout,      {.v = &layouts[0]}   }, // tile
@@ -217,6 +219,7 @@ static Key keys[] = {
 	{ SUPERKEY,                     XK_Right,  viewtoright,    {0}                       },
 	{ SUPERKEY|ShiftMask,           XK_Left,   tagtoleft,      {0}                       },
 	{ SUPERKEY|ShiftMask,           XK_Right,  tagtoright,     {0}                       },
+  { MODKEY|ControlMask|ShiftMask, XK_q,      quit,           {1}                       },
 };
 
 /* button definitions */

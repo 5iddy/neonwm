@@ -223,6 +223,8 @@ static void setup(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
+static void sighup(int unused);
+static void sigterm(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -287,6 +289,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[UnmapNotify] = unmapnotify
 };
 static Atom wmatom[WMLast], netatom[NetWMWindowsOpacity+1];
+static int restart = 0;
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -354,7 +357,7 @@ applyrules(Client *c)
 	/* rule matching */
 	c->isfloating = 0;
 	c->tags = 0;
-  c->opacity = noopacity;
+  c->opacity = fullopacity;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
@@ -553,8 +556,8 @@ changeopacity(const Arg *arg)
 	if(selmon->sel->opacity > 1.0)
 		selmon->sel->opacity = 1.0;
 
-	if(selmon->sel->opacity < 0)
-		selmon->sel->opacity = 0;
+	if(selmon->sel->opacity <= 0)
+		selmon->sel->opacity = 1.0;
 
 	opacity(selmon->sel, selmon->sel->opacity);
 }
@@ -961,6 +964,8 @@ focus(Client *c)
 			selmon = c->mon;
 		if (c->isurgent)
 			seturgent(c, 0);
+    if (c->opacity==0)
+        opacity(c,fullopacity);
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
@@ -981,7 +986,9 @@ focusin(XEvent *e)
 	XFocusChangeEvent *ev = &e->xfocus;
 
 	if (selmon->sel && ev->window != selmon->sel->win)
+  {
 		setfocus(selmon->sel);
+  }
 }
 
 void
@@ -1625,6 +1632,7 @@ quit(const Arg *arg)
 		}
 	}
   free(autostart_pids);
+  if(arg->i) restart = 1;
 	running = 0;
 }
 
@@ -1913,6 +1921,8 @@ setup(void)
 
 	/* clean up any zombies immediately */
 	sigchld(0);
+  signal(SIGHUP, sighup);
+	signal(SIGTERM, sigterm);
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -2035,6 +2045,20 @@ sigchld(int unused)
 			}
 		}
 	}
+}
+
+void
+sighup(int unused)
+{
+	Arg a = {.i = 1};
+	quit(&a);
+}
+
+void
+sigterm(int unused)
+{
+	Arg a = {.i = 0};
+	quit(&a);
 }
 
 void
@@ -2509,8 +2533,12 @@ wintoclient(Window w)
 
 	for (m = mons; m; m = m->next)
 		for (c = m->clients; c; c = c->next)
+    {
 			if (c->win == w)
-				return c;
+      {
+          return c;
+      }
+    }
 	return NULL;
 }
 
@@ -2673,6 +2701,7 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 	scan();
 	run();
+  if(restart) execvp(argv[0], argv);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
