@@ -141,6 +141,7 @@ static const Launcher launchers[] = {
 
 static const char *const autostart[] = {
   "picom", "--config", "/home/noodles/.config/picom/dwm.conf", NULL,
+  "eval", "$(ssh-agent -s)", NULL,
   NULL /* terminate */
 };
 
