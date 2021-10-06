@@ -82,24 +82,21 @@ static const Rule rules[] = {
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static const int   nmaster     = 2;    /* number of clients in master area */
+static const int   nmaster     = 1;    /* number of clients in master area */
 static const int   resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 static const int   lockfullscreen = 0; /* 1 will force focus on the fullscreen window */
 
 #include "grid.c"
 #include "horizgrid.c"
-#include "nmaster.c"
 static const Layout layouts[] = {
 	// symbol   arrange function
 	{ "",      tile      }, // [0] tile isdefault
-	{ "",      monocle   }, // [1]
-  { "",      grid      }, // [2]
+	{ "",      monocle   }, // [1]
+  { "",      grid      }, // [2]
   { "",      horizgrid }, // [3]
-	{ "",      NULL      }, // [4] no layout function means floating behavior
-  { "TTT",    bstack    }, // [5]
-  { "-|=",    ntile     }, // [6]
-	{ "-|-",    nbstack   }, // [7]
-  { "|||",    ncol      }, // [8]
+	{ "",      NULL      }, // [4] no layout function means floating behavior
+  { "充",     bstack    }, // [5]
+  { "DD",     doubledeck}, // [6]
   { NULL,     NULL      }, 
 };
 
@@ -119,6 +116,7 @@ static const Layout layouts[] = {
 #define TERM(title, cmd) { .v = (const char*[]){ "st",  "-T", title, "-e", cmd, NULL } }
 #define SPAWN(title, cmd) { "st",  "-T", title, "-e", cmd, NULL }
 #define ROFI(cmd) { .v = (const char*[]){ "/home/noodles/.config/rofi/bin/" cmd, NULL  } }
+#define ROFISH(cmd) { "/home/noodles/.config/rofi/bin/" cmd, NULL }
 
 /* launcher commands (They must be NULL terminated) */
 static const char *termcmd[]      = {"st", NULL};
@@ -131,9 +129,11 @@ static const char *nvim[]         = SPAWN("nvim", "nvim");
 static const char *ranger[]       = SPAWN("Ranger", "ranger");
 static const char *thunar[]       = SPAWNSH("thunar");
 static const char *pavucontrol[]  = SPAWNSH("pavucontrol");
+static const char *rofimenu[]     = ROFISH("launcher_misc");
 
 static const Launcher launchers[] = {
-       /* command       name to display */
+// command       name to display
+  { rofimenu,     "" },
 	{ duck,         "" },
   { yt,           "" },
   { firefox,      "" },
@@ -146,7 +146,6 @@ static const Launcher launchers[] = {
 
 static const char *const autostart[] = {
   "picom", "--config", "/home/noodles/.config/picom/dwm.conf", NULL,
-  "eval", "$(ssh-agent -s)", NULL,
   NULL /* terminate */
 };
 
@@ -163,7 +162,6 @@ static Key keys[] = {
 	{ MODKEY,                       XK_k,           focusstack,     {.i = -1 }           },
 	{ MODKEY,                       XK_i,           incnmaster,     {.i = +1 }           },
 	{ MODKEY,                       XK_d,           incnmaster,     {.i = -1 }           },
-  { MODKEY,                       XK_x,           setnmaster,     {.i = 2 }            },
 	{ MODKEY,                       XK_h,           setmfact,       {.f = -0.05}         },
 	{ MODKEY,                       XK_l,           setmfact,       {.f = +0.05}         },
 	{ MODKEY,                       XK_Return,      zoom,           {0}                  },
@@ -177,6 +175,7 @@ static Key keys[] = {
   { MODKEY|ShiftMask,             XK_g,           setlayout,      {.v = &layouts[3]}   }, // horizgrid
 	{ MODKEY,                       XK_f,           setlayout,      {.v = &layouts[4]}   }, // floats
   { MODKEY,                       XK_u,           setlayout,      {.v = &layouts[5]}   }, // bstack
+  { MODKEY,                       XK_r,           setlayout,      {.v = &layouts[6]}   },
   { MODKEY|ControlMask,		        XK_comma,       cyclelayout,    {.i = -1 }           },
 	{ MODKEY|ControlMask,           XK_period,      cyclelayout,    {.i = +1 }           },
 	{ MODKEY,                       XK_space,       setlayout,      {0}                  },
