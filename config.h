@@ -9,11 +9,11 @@ static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const double defaultopacity  = 0.8;
 static const double fullopacity     = 1.0;
-static const char *fonts[]          = { "Input Mono Condensed:pixelsize=16:style=regular:antialias=true:autohint=true",
-    "FontAwesome:pixelsize=16:antialias=true:autohint=true", 
-    "Noto Sans Telugu UI:pixelsize=16:antialias=true:autohint=true",
+static const char *fonts[]          = { "mononoki Nerd Font:pixelsize=18:style=regular:antialias=true:autohint=true",
+    "FontAwesome:pixelsize=18:antialias=true:autohint=true", 
+    "Noto Sans Telugu UI:pixelsize=18:antialias=true:autohint=true",
                                       };
-static const char dmenufont[]       = "Input Mono Condensed:pixelsize=16:antialias=true:autohint=true";
+static const char dmenufont[]       = "mononoki Nerd Font:pixelsize=18:antialias=true:autohint=true";
 static const char col_gray1[]       = "#24222F";
 static const char col_gray2[]       = "#2d2b3a";
 static const char col_gray3[]       = "#8E87C1";
@@ -32,6 +32,8 @@ static const char col_green2[]      = "#89EC4B";
 static const unsigned int baralpha = 0xd0;
 static const unsigned int borderalpha = OPAQUE;
 
+static const char *monocle_symbols[10] = { "","","","","","","","","","" };
+
 static const char *colors[][3]      = {
 	//               fg         bg         border   
 	[SchemeNorm] = { col_gray4, col_gray2, col_gray3 },
@@ -47,9 +49,9 @@ static const unsigned int alphas[][3]      = {
 /* tagging */
 static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
 // uncomment the below line for english tags 
-// static const char *tagsalt[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" }; 
+static const char *tagsalt[] = { "", "", "", "", "", "", "", "", "" }; 
 // uncomment the line below for telugu tags
-static const char *tagsalt[] = { "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯" }; // for telugu numbers, requires noto-fonts to work
+// static const char *tagsalt[] = { "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯" }; // for telugu numbers, requires noto-fonts to work
 static const int momentaryalttags = 0; /* 1 means alttags will show only when key is held down*/
 
 static const char *tagsel[][2] = {
@@ -75,27 +77,30 @@ static const Rule rules[] = {
 	{ "Gimp",     NULL,       NULL,         0,          1,         fullopacity,		   -1  },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,         fullopacity,		   -1  },
 	{ "St",	      NULL,       NULL,         0,          0,         fullopacity,      -1  },
-	{ "Chromium", "chromium", "Open Files", 0,          1,         fullopacity,      -1  },
+	{ "Chromium", NULL,       NULL,         0,          0,         fullopacity,      -1  },
 };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static const int   nmaster     = 1;    /* number of clients in master area */
+static const int   nmaster     = 2;    /* number of clients in master area */
 static const int   resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 static const int   lockfullscreen = 0; /* 1 will force focus on the fullscreen window */
 
-
 #include "grid.c"
 #include "horizgrid.c"
+#include "nmaster.c"
 static const Layout layouts[] = {
 	// symbol   arrange function
 	{ "",      tile      }, // [0] tile isdefault
-	{ "",      monocle   },
-  { "",      grid      },
-  { "",      horizgrid },
-	{ "",      NULL      }, // no layout function means floating behavior
-  { "TTT",    bstack    },
-  { NULL,     NULL      }
+	{ "",      monocle   }, // [1]
+  { "",      grid      }, // [2]
+  { "",      horizgrid }, // [3]
+	{ "",      NULL      }, // [4] no layout function means floating behavior
+  { "TTT",    bstack    }, // [5]
+  { "-|=",    ntile     }, // [6]
+	{ "-|-",    nbstack   }, // [7]
+  { "|||",    ncol      }, // [8]
+  { NULL,     NULL      }, 
 };
 
 /* key definitions */
@@ -132,7 +137,7 @@ static const Launcher launchers[] = {
 	{ duck,         "" },
   { yt,           "" },
   { firefox,      "" },
-  { nvim,         "" },
+  { nvim,         "" },
   { chromium,     "" },
   { ranger,       "" },
   { thunar,       "" },
@@ -158,6 +163,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_k,           focusstack,     {.i = -1 }           },
 	{ MODKEY,                       XK_i,           incnmaster,     {.i = +1 }           },
 	{ MODKEY,                       XK_d,           incnmaster,     {.i = -1 }           },
+  { MODKEY,                       XK_x,           setnmaster,     {.i = 2 }            },
 	{ MODKEY,                       XK_h,           setmfact,       {.f = -0.05}         },
 	{ MODKEY,                       XK_l,           setmfact,       {.f = +0.05}         },
 	{ MODKEY,                       XK_Return,      zoom,           {0}                  },
@@ -167,8 +173,8 @@ static Key keys[] = {
   // Setting layout shortcuts
 	{ MODKEY,                       XK_t,           setlayout,      {.v = &layouts[0]}   }, // tile
 	{ MODKEY,                       XK_m,           setlayout,      {.v = &layouts[1]}   }, // monocle
-  { ALTKEY,                       XK_g,           setlayout,      {.v = &layouts[2]}   }, // grid
-  { ALTKEY|ShiftMask,             XK_g,           setlayout,      {.v = &layouts[3]}   }, // horizgrid
+  { MODKEY,                       XK_g,           setlayout,      {.v = &layouts[2]}   }, // grid
+  { MODKEY|ShiftMask,             XK_g,           setlayout,      {.v = &layouts[3]}   }, // horizgrid
 	{ MODKEY,                       XK_f,           setlayout,      {.v = &layouts[4]}   }, // floats
   { MODKEY,                       XK_u,           setlayout,      {.v = &layouts[5]}   }, // bstack
   { MODKEY|ControlMask,		        XK_comma,       cyclelayout,    {.i = -1 }           },
@@ -221,14 +227,16 @@ static Key keys[] = {
 	{ SUPERKEY|ShiftMask,           XK_Left,   tagtoleft,      {0}                       },
 	{ SUPERKEY|ShiftMask,           XK_Right,  tagtoright,     {0}                       },
   { MODKEY|ControlMask|ShiftMask, XK_q,      quit,           {1}                       },
+  { SUPERKEY,                     XK_e,      spawn,          SHCMD("thunar")           },
+  { SUPERKEY,                     XK_t,      spawn,          SHCMD("st")               },
 };
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
-	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
+	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = 1 } },
+	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },

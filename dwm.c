@@ -1142,9 +1142,17 @@ grabkeys(void)
 void
 incnmaster(const Arg *arg)
 {
+  
 	selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
+	// arrange(selmon);
+	if(!arg || !selmon->lt[selmon->sellt]->arrange || selmon->num >= MaxMon)
+		return;
+	nmasters[selmon->num] += arg->i;
+	if(nmasters[selmon->num] < 0)
+		nmasters[selmon->num] = 0;
 	arrange(selmon);
 }
+
 
 #ifdef XINERAMA
 static int
@@ -1317,8 +1325,12 @@ monocle(Monitor *m)
 	for (c = m->clients; c; c = c->next)
 		if (ISVISIBLE(c))
 			n++;
-	if (n > 0) // override layout symbol 
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
+	if (n > 0 && n < 9) // override layout symbol 
+  {
+		snprintf(m->ltsymbol, sizeof m->ltsymbol, "%s", monocle_symbols[n]);
+  } else if (n > 9) {
+		snprintf(m->ltsymbol, sizeof m->ltsymbol, "%s", monocle_symbols[9]);
+  }
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
 		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
 }
@@ -1865,7 +1877,7 @@ setfullscreen(Client *c, int fullscreen)
 //		c->oldbw = c->bw;
 //		c->bw = 0;
 //		c->isfloating = 1;
-//		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+		resizeclient(c, c->x, c->y, c->w, c->h);
 //		XRaiseWindow(dpy, c->win);
 	} else if (!fullscreen && c->isfullscreen){
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
@@ -1877,11 +1889,10 @@ setfullscreen(Client *c, int fullscreen)
 //		c->y = c->oldy;
 //		c->w = c->oldw;
 //		c->h = c->oldh;
-//		resizeclient(c, c->x, c->y, c->w, c->h);
+		resizeclient(c, c->x, c->y, c->w, c->h);
 //		arrange(c->mon);
 	}
 }
-
 
 void
 setlayout(const Arg *arg)
